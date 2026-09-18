@@ -1,30 +1,148 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark" data-lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Qwley Shade — Custom Cursor</title>
-<meta name="description" content="A custom cursor with real inertia: a dot that tracks the pointer, a ring that trails behind it, and a logo tile that drifts along.">
-<meta name="color-scheme" content="dark">
+<title>Qwley Shade — Shaders for Roblox</title>
+<meta name="description" content="Qwley Shade is a lighting and post-processing shader pack for Roblox: soft ambient light, real shadows and richer colour without losing FPS.">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#08090b">
+
+<!-- Applied before the first paint: no flash of the wrong theme or language -->
+<script>
+(function () {
+  try {
+    var t = localStorage.getItem('qs-theme');
+    var l = localStorage.getItem('qs-lang');
+    if (t !== 'light' && t !== 'dark') {
+      t = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+    }
+    if (l !== 'en' && l !== 'ru') {
+      l = /^ru/i.test(navigator.language || 'en') ? 'ru' : 'en';
+    }
+    var d = document.documentElement;
+    d.setAttribute('data-theme', t);
+    d.setAttribute('data-lang', l);
+    d.setAttribute('lang', l);
+  } catch (e) {}
+})();
+</script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;1,800&display=swap" rel="stylesheet">
+
 <style>
 /* ============================================================
-   1. Reset & tokens
+   1. Reset & theme tokens
    ============================================================ */
 *, *::before, *::after { box-sizing: border-box; }
 
 :root {
-  --bg:        #08090b;
-  --fg:        #f4f5f7;
-  --muted:     #8a8f98;
-  --muted-dim: #5f646c;
-  --line:      rgba(255, 255, 255, .08);
-  --line-2:    rgba(255, 255, 255, .16);
-  --maxw:      1120px;
-  --nav-h:     72px;
-  --tile:      104px;
+  /* dark theme (default) */
+  --bg-rgb:       8, 9, 11;
+  --surface-rgb:  18, 20, 24;
+  --bg:           #08090b;
+  --surface:      #12141a;
+  --surface-2:    #16181d;
+  --tile-bg:      #14161b;
+  --fg:           #f4f5f7;
+  --fg-dim:       #d6d9de;
+  --muted:        #8a8f98;
+  --muted-dim:    #5f646c;
+  --line:         rgba(255, 255, 255, .08);
+  --line-2:       rgba(255, 255, 255, .16);
+  --ghost-bg:     rgba(255, 255, 255, .05);
+  --ghost-bg-h:   rgba(255, 255, 255, .09);
+  --solid-bg:     #ffffff;
+  --solid-fg:     #08090b;
+  --solid-glow:   rgba(255, 255, 255, .14);
+  --solid-glow-h: rgba(255, 255, 255, .22);
+  --fill-base:    rgba(255, 255, 255, .42);
+  --fill-active:  #ffffff;
+  --fill-glow:    rgba(255, 255, 255, .35);
+  --ink:          #ffffff;
+  --ink-rgb:      255, 255, 255;
+  --ring:         rgba(255, 255, 255, .8);
+  --ring-h:       rgba(255, 255, 255, 1);
+  --ring-bg:      rgba(255, 255, 255, .07);
+  --dot:          #ffffff;
+  --dot-h:        rgba(255, 255, 255, .6);
+  --dot-glow:     rgba(255, 255, 255, .55);
+  --focus:        rgba(255, 255, 255, .75);
+  --tile-shadow:  rgba(0, 0, 0, .65);
+  --nav-shadow:   rgba(0, 0, 0, .45);
+  --seg-bg:       rgba(255, 255, 255, .04);
+  --seg-thumb:    rgba(255, 255, 255, .12);
+  --seg-fg:       #8a8f98;
+  --seg-fg-on:    #ffffff;
+  --glare:        rgba(255, 255, 255, .16);
+  --sheen:        rgba(255, 255, 255, .05);
+  --grain:        .04;
+
+  --maxw:  1120px;
+  --nav-h: 72px;
+  --tile:  104px;
+}
+
+html[data-theme="light"] {
+  --bg-rgb:       244, 245, 247;
+  --surface-rgb:  255, 255, 255;
+  --bg:           #f4f5f7;
+  --surface:      #ffffff;
+  --surface-2:    #ffffff;
+  --tile-bg:      #ffffff;
+  --fg:           #0c0e12;
+  --fg-dim:       #33383f;
+  --muted:        #5d636d;
+  --muted-dim:    #868d98;
+  --line:         rgba(12, 14, 18, .10);
+  --line-2:       rgba(12, 14, 18, .18);
+  --ghost-bg:     rgba(12, 14, 18, .04);
+  --ghost-bg-h:   rgba(12, 14, 18, .08);
+  --solid-bg:     #0c0e12;
+  --solid-fg:     #ffffff;
+  --solid-glow:   rgba(12, 14, 18, .18);
+  --solid-glow-h: rgba(12, 14, 18, .28);
+  --fill-base:    rgba(12, 14, 18, .38);
+  --fill-active:  #0c0e12;
+  --fill-glow:    rgba(12, 14, 18, .18);
+  --ink:          #0c0e12;
+  --ink-rgb:      12, 14, 18;
+  --ring:         rgba(12, 14, 18, .62);
+  --ring-h:       rgba(12, 14, 18, .95);
+  --ring-bg:      rgba(12, 14, 18, .06);
+  --dot:          #0c0e12;
+  --dot-h:        rgba(12, 14, 18, .55);
+  --dot-glow:     rgba(12, 14, 18, .25);
+  --focus:        rgba(12, 14, 18, .7);
+  --tile-shadow:  rgba(12, 14, 18, .13);
+  --nav-shadow:   rgba(12, 14, 18, .10);
+  --seg-bg:       rgba(12, 14, 18, .04);
+  --seg-thumb:    rgba(12, 14, 18, .10);
+  --seg-fg:       #6a707a;
+  --seg-fg-on:    #0c0e12;
+  --glare:        rgba(12, 14, 18, .07);
+  --sheen:        rgba(255, 255, 255, .9);
+  --grain:        .07;
+}
+
+html[data-theme="dark"]  { color-scheme: dark; }
+html[data-theme="light"] { color-scheme: light; }
+
+/* Slow cross-fade of every themed property, only while switching */
+html.theme-anim *,
+html.theme-anim *::before,
+html.theme-anim *::after {
+  transition: background-color .5s ease, color .5s ease, border-color .5s ease,
+              box-shadow .5s ease, fill .5s ease, stroke .5s ease, opacity .5s ease !important;
+}
+/* keep the two showpiece animations alive while the theme cross-fades */
+html.theme-anim .seg__thumb {
+  transition: transform .4s cubic-bezier(.4, 0, .2, 1), background-color .5s ease !important;
+}
+html.theme-anim .fill-text::after {
+  transition: clip-path .62s cubic-bezier(.22, 1, .36, 1), color .5s ease !important;
 }
 
 html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
@@ -32,7 +150,7 @@ html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
 body {
   margin: 0;
   min-height: 100vh;
-  background: var(--bg);
+  background-color: var(--bg);
   color: var(--fg);
   font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   font-size: 16px;
@@ -42,34 +160,21 @@ body {
   overflow-x: hidden;
 }
 
-/* Ambient background glows, fixed behind everything */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(760px 520px at 50% -8%,  rgba(255, 255, 255, .07), transparent 62%),
-    radial-gradient(620px 460px at 12% 22%,  rgba(120, 150, 255, .045), transparent 65%),
-    radial-gradient(680px 520px at 88% 78%,  rgba(255, 170, 120, .03), transparent 68%);
-}
-
-/* Fine film grain, above the animation but below the content */
+/* Fine film grain (colour follows the theme) */
 body::after {
   content: '';
   position: fixed;
   inset: 0;
   z-index: 3;
   pointer-events: none;
-  opacity: .035;
+  opacity: var(--grain);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 a { color: inherit; text-decoration: none; }
 
 :focus-visible {
-  outline: 2px solid rgba(255, 255, 255, .75);
+  outline: 2px solid var(--focus);
   outline-offset: 3px;
   border-radius: 8px;
 }
@@ -84,7 +189,38 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* ============================================================
-   2. Animated background (particle network on canvas)
+   2. Ambient glows — two layers, cross-faded on theme change
+   ============================================================ */
+.ambient {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+.ambient > i {
+  position: absolute;
+  inset: 0;
+  transition: opacity .55s ease;
+}
+.ambient__dark {
+  opacity: 1;
+  background:
+    radial-gradient(760px 520px at 50% -8%, rgba(255, 255, 255, .07), transparent 62%),
+    radial-gradient(620px 460px at 12% 22%, rgba(120, 150, 255, .05), transparent 65%),
+    radial-gradient(680px 520px at 88% 78%, rgba(255, 170, 120, .035), transparent 68%);
+}
+.ambient__light {
+  opacity: 0;
+  background:
+    radial-gradient(760px 520px at 50% -8%, rgba(12, 14, 18, .05), transparent 62%),
+    radial-gradient(620px 460px at 12% 22%, rgba(70, 110, 255, .07), transparent 65%),
+    radial-gradient(680px 520px at 88% 78%, rgba(255, 140, 80, .06), transparent 68%);
+}
+html[data-theme="light"] .ambient__dark  { opacity: 0; }
+html[data-theme="light"] .ambient__light { opacity: 1; }
+
+/* ============================================================
+   3. Animated background (particle network on canvas)
    ============================================================ */
 #bg-canvas {
   position: fixed;
@@ -108,13 +244,28 @@ a { color: inherit; text-decoration: none; }
   opacity: 0;
   transform: translate3d(-9999px, -9999px, 0);
   transition: opacity .6s ease;
-  background: radial-gradient(circle, rgba(255,255,255,.05), rgba(255,255,255,0) 62%);
   will-change: transform;
 }
 .spotlight.is-visible { opacity: 1; }
+.spotlight > i {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  transition: opacity .55s ease;
+}
+.spotlight__dark {
+  opacity: 1;
+  background: radial-gradient(circle, rgba(255, 255, 255, .05), rgba(255, 255, 255, 0) 62%);
+}
+.spotlight__light {
+  opacity: 0;
+  background: radial-gradient(circle, rgba(12, 14, 18, .05), rgba(12, 14, 18, 0) 62%);
+}
+html[data-theme="light"] .spotlight__dark  { opacity: 0; }
+html[data-theme="light"] .spotlight__light { opacity: 1; }
 
 /* ============================================================
-   3. Custom cursor layer (ring + dot, driven by JS)
+   4. Custom cursor layer (ring + dot, driven by JS)
    ============================================================ */
 .cursor {
   position: fixed;
@@ -144,7 +295,7 @@ a { color: inherit; text-decoration: none; }
 .cursor__ring {
   width: 34px;
   height: 34px;
-  border: 1.5px solid rgba(255, 255, 255, .8);
+  border: 1.5px solid var(--ring);
   transition: border-color .25s ease, background-color .25s ease;
 }
 
@@ -152,18 +303,18 @@ a { color: inherit; text-decoration: none; }
 .cursor__dot {
   width: 6px;
   height: 6px;
-  background: #ffffff;
-  box-shadow: 0 0 10px rgba(255, 255, 255, .55);
+  background-color: var(--dot);
+  box-shadow: 0 0 10px var(--dot-glow);
   transition: background-color .25s ease, box-shadow .25s ease;
 }
 
 /* state: hovering an interactive element */
 .cursor.is-hover .cursor__ring {
-  border-color: rgba(255, 255, 255, 1);
-  background-color: rgba(255, 255, 255, .07);
+  border-color: var(--ring-h);
+  background-color: var(--ring-bg);
 }
 .cursor.is-hover .cursor__dot {
-  background-color: rgba(255, 255, 255, .6);
+  background-color: var(--dot-h);
   box-shadow: none;
 }
 
@@ -179,28 +330,29 @@ html.has-cursor * { cursor: none !important; }
 }
 
 /* ============================================================
-   4. Navigation
+   5. Navigation
    ============================================================ */
 .nav {
   position: sticky;
   top: 0;
   z-index: 100;
   padding: 14px 0;
-  background: linear-gradient(to bottom, rgba(8,9,11,.92), rgba(8,9,11,.5) 70%, rgba(8,9,11,0));
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  background-color: rgba(var(--bg-rgb), .82);
+  border-bottom: 1px solid var(--line);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
 .nav__inner {
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: 14px;
   height: 52px;
   padding: 0 10px 0 14px;
   border: 1px solid var(--line);
   border-radius: 999px;
-  background: rgba(18, 20, 24, .72);
-  box-shadow: 0 10px 34px rgba(0, 0, 0, .45);
+  background-color: rgba(var(--surface-rgb), .72);
+  box-shadow: 0 10px 34px var(--nav-shadow);
 }
 
 .brand {
@@ -218,7 +370,7 @@ html.has-cursor * { cursor: none !important; }
   display: grid;
   place-items: center;
   border-radius: 8px;
-  background: #16181d;
+  background-color: var(--surface-2);
   border: 1px solid var(--line-2);
   font-size: 13px;
   font-weight: 800;
@@ -231,8 +383,71 @@ html.has-cursor * { cursor: none !important; }
   gap: 8px;
 }
 
+.nav__divider {
+  width: 1px;
+  height: 20px;
+  margin: 0 4px;
+  background-color: var(--line-2);
+}
+
 /* ============================================================
-   5. Buttons
+   6. Segmented controls (theme + language)
+   ============================================================ */
+.seg {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background-color: var(--seg-bg);
+  flex: none;
+}
+.seg__thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  border-radius: 999px;
+  background-color: var(--seg-thumb);
+  transition: transform .4s cubic-bezier(.4, 0, .2, 1);
+}
+.seg__btn {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: none;
+  padding: 0;
+  margin: 0;
+  color: var(--seg-fg);
+  font: inherit;
+  transition: color .3s ease;
+}
+.seg__btn svg { width: 15px; height: 15px; display: block; }
+
+.seg--theme .seg__btn,
+.seg--theme .seg__thumb { width: 28px; height: 28px; }
+
+.seg--lang .seg__btn,
+.seg--lang .seg__thumb { width: 34px; height: 28px; }
+.seg--lang .seg__btn {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .06em;
+}
+
+/* thumb position + active label colour */
+html[data-theme="dark"] .seg--theme .seg__thumb { transform: translateX(100%); }
+html[data-lang="ru"]    .seg--lang  .seg__thumb { transform: translateX(100%); }
+
+html[data-theme="light"] .seg--theme [data-theme-set="light"],
+html[data-theme="dark"]  .seg--theme [data-theme-set="dark"],
+html[data-lang="en"]     .seg--lang  [data-lang-set="en"],
+html[data-lang="ru"]     .seg--lang  [data-lang-set="ru"] { color: var(--seg-fg-on); }
+
+/* ============================================================
+   7. Buttons
    ============================================================ */
 .btn {
   display: inline-flex;
@@ -252,18 +467,18 @@ html.has-cursor * { cursor: none !important; }
 .btn:active { transform: scale(.97); }
 
 .btn--solid {
-  background: #ffffff;
-  color: #08090b;
-  box-shadow: 0 8px 26px rgba(255, 255, 255, .14);
+  background-color: var(--solid-bg);
+  color: var(--solid-fg);
+  box-shadow: 0 8px 26px var(--solid-glow);
 }
-.btn--solid:hover { background: #e9eaee; box-shadow: 0 10px 32px rgba(255,255,255,.22); }
+.btn--solid:hover { box-shadow: 0 10px 32px var(--solid-glow-h); }
 
 .btn--ghost {
-  background: rgba(255, 255, 255, .05);
+  background-color: var(--ghost-bg);
   border-color: var(--line);
-  color: #d6d9de;
+  color: var(--fg-dim);
 }
-.btn--ghost:hover { background: rgba(255, 255, 255, .09); border-color: var(--line-2); color: #fff; }
+.btn--ghost:hover { background-color: var(--ghost-bg-h); border-color: var(--line-2); color: var(--fg); }
 
 .btn--lg { height: 48px; padding: 0 26px; font-size: 14.5px; }
 
@@ -273,7 +488,7 @@ html.has-cursor * { cursor: none !important; }
 .fill-text {
   position: relative;
   display: inline-block;
-  color: rgba(255, 255, 255, .42);
+  color: var(--fill-base);
   transition: color .4s ease;
 }
 .fill-text::after {
@@ -282,10 +497,10 @@ html.has-cursor * { cursor: none !important; }
   left: 0;
   top: 0;
   width: 100%;
-  color: #ffffff;
-  text-shadow: 0 0 14px rgba(255, 255, 255, .35);
+  color: var(--fill-active);
+  text-shadow: 0 0 14px var(--fill-glow);
   clip-path: inset(100% 0 0 0);          /* empty — the fill rises from the bottom */
-  transition: clip-path .62s cubic-bezier(.22, 1, .36, 1);
+  transition: clip-path .62s cubic-bezier(.22, 1, .36, 1), color .5s ease;
   pointer-events: none;
 }
 .btn--fill:hover .fill-text::after,
@@ -297,7 +512,7 @@ html.has-cursor * { cursor: none !important; }
 }
 
 /* ============================================================
-   6. Hero
+   8. Hero
    ============================================================ */
 .hero {
   position: relative;
@@ -317,16 +532,17 @@ html.has-cursor * { cursor: none !important; }
   z-index: 4;
   width: var(--tile);
   height: var(--tile);
-  margin: 0 auto 38px;
+  margin: 0 auto 30px;
   display: grid;
   place-items: center;
   border-radius: 26px;
-  background: linear-gradient(160deg, #1a1d23, #0e1013);
+  background-color: var(--tile-bg);
   border: 1px solid var(--line-2);
-  box-shadow: 0 26px 70px rgba(0, 0, 0, .65), inset 0 1px 0 rgba(255,255,255,.06);
+  box-shadow: 0 26px 70px var(--tile-shadow), inset 0 1px 0 var(--sheen);
   pointer-events: none;
   will-change: transform;
   transform: perspective(760px);
+  overflow: hidden;
 }
 .logo-tile span {
   font-size: 54px;
@@ -334,25 +550,35 @@ html.has-cursor * { cursor: none !important; }
   font-style: italic;
   line-height: 1;
   letter-spacing: -.04em;
+  color: var(--fg);
 }
 
 /* specular highlight that slides across the face with the pointer */
 .logo-tile__glare {
   position: absolute;
   inset: 0;
-  border-radius: inherit;
   opacity: 0;
   pointer-events: none;
   background: radial-gradient(circle at var(--gx, 50%) var(--gy, 0%),
-              rgba(255,255,255,.16), rgba(255,255,255,0) 58%);
+              var(--glare), rgba(255, 255, 255, 0) 58%);
   transition: opacity .3s ease;
 }
 
 /* everything else in the hero sits above the tile */
 .hero h1,
 .hero .lead,
+.hero .kicker,
 .hero .hero__actions,
 .hero .hint { position: relative; z-index: 5; }
+
+.kicker {
+  margin: 0 0 10px;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--muted-dim);
+}
 
 h1 {
   margin: 0 0 20px;
@@ -365,7 +591,7 @@ h1 {
 
 .lead {
   margin: 0 auto 36px;
-  max-width: 540px;
+  max-width: 560px;
   font-size: clamp(15px, 2.2vw, 17px);
   color: var(--muted);
   line-height: 1.65;
@@ -381,14 +607,23 @@ h1 {
 
 .hint {
   margin: 46px 0 0;
+  max-width: 520px;
   font-size: 12.5px;
   color: var(--muted-dim);
   letter-spacing: .02em;
 }
-.hint b { color: #b9bdc4; font-weight: 600; }
 
 /* ============================================================
-   7. Footer
+   9. Language swap animation
+   ============================================================ */
+[data-i18n] { transition: opacity .18s ease, transform .18s ease; }
+html.i18n-fade [data-i18n] {
+  opacity: 0;
+  transform: translateY(5px);
+}
+
+/* ============================================================
+   10. Footer
    ============================================================ */
 .footer {
   padding: 0 0 40px;
@@ -402,40 +637,67 @@ h1 {
 }
 
 /* ============================================================
-   8. Responsive
+   11. Responsive
    ============================================================ */
+@media (max-width: 1000px) {
+  .brand__name { display: none; }
+}
+
 @media (max-width: 900px) {
   :root { --tile: 88px; }
   .hero { padding: 56px 20px 96px; }
-  .logo-tile { margin-bottom: 30px; border-radius: 22px; }
+  .logo-tile { margin-bottom: 24px; border-radius: 22px; }
   .logo-tile span { font-size: 44px; }
+}
+
+@media (max-width: 720px) {
+  .nav__cta .btn--ghost { display: none; }   /* keep only Download in the pill */
 }
 
 @media (max-width: 560px) {
   :root { --nav-h: 66px; }
   .wrap { padding: 0 18px; }
   .nav { padding: 10px 0; }
-  .nav__inner { height: 48px; padding: 0 6px 0 10px; gap: 10px; }
-  .brand__name { display: none; }
+  .nav__inner { height: 48px; padding: 0 6px 0 10px; gap: 8px; }
+  .nav__divider { display: none; }
   .btn { height: 38px; padding: 0 16px; }
   .btn--lg { height: 46px; padding: 0 22px; }
+  .seg--theme .seg__btn,
+  .seg--theme .seg__thumb { width: 26px; height: 26px; }
+  .seg--lang .seg__btn,
+  .seg--lang .seg__thumb { width: 31px; height: 26px; }
   .hero__actions { flex-direction: column; align-items: stretch; width: 100%; max-width: 320px; }
   .hero__actions .btn { width: 100%; }
+}
+
+@media (max-width: 400px) {
+  .brand { display: none; }
 }
 
 /* Respect reduced motion: keep the look, drop the movement */
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .btn, .cursor, .cursor__ring, .cursor__dot, .spotlight,
-  .fill-text, .fill-text::after { transition-duration: .01ms; }
+  .fill-text, .fill-text::after, .seg__thumb, .ambient > i, .spotlight > i,
+  [data-i18n] { transition-duration: .01ms; }
+  html.theme-anim *,
+  html.theme-anim *::before,
+  html.theme-anim *::after { transition-duration: .01ms !important; }
 }
 </style>
 </head>
 <body>
 
-<!-- ============ animated background ============ -->
+<!-- ============ background layers ============ -->
+<div class="ambient" aria-hidden="true">
+  <i class="ambient__dark"></i>
+  <i class="ambient__light"></i>
+</div>
 <canvas id="bg-canvas" aria-hidden="true"></canvas>
-<div class="spotlight" aria-hidden="true"></div>
+<div class="spotlight" aria-hidden="true">
+  <i class="spotlight__dark"></i>
+  <i class="spotlight__light"></i>
+</div>
 
 <!-- ============ custom cursor layer ============ -->
 <div class="cursor" id="cursor" aria-hidden="true">
@@ -455,9 +717,35 @@ h1 {
       <div class="nav__cta">
         <a class="btn btn--ghost" href="https://t.me/qwleyshade" target="_blank" rel="noopener noreferrer">
           <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.9 4.3 18.7 19c-.2 1-.9 1.3-1.7.8l-4.7-3.5-2.3 2.2c-.3.3-.5.5-1 .5l.3-4.7 8.6-7.8c.4-.3-.1-.5-.6-.2L6.7 12.9 2.1 11.5c-1-.3-1-1 .2-1.4l18.2-7c.8-.3 1.6.2 1.4 1.2Z"/></svg>
-          Telegram
+          <span data-i18n="nav.telegram">Telegram</span>
         </a>
-        <a class="btn btn--solid" href="https://raw.githubusercontent.com/daniil179828/QWLEY-SHADE-install-/f7156a76bbc8dcd405b4166b19e520e0e4d69d24/qwley-shade-launcher.exe" rel="noopener">Download</a>
+
+        <a class="btn btn--solid" href="https://raw.githubusercontent.com/daniil179828/QWLEY-SHADE-install-/f7156a76bbc8dcd405b4166b19e520e0e4d69d24/qwley-shade-launcher.exe" rel="noopener">
+          <span data-i18n="nav.download">Download</span>
+        </a>
+
+        <span class="nav__divider" aria-hidden="true"></span>
+
+        <div class="seg seg--theme" role="group" data-i18n-label="a11y.theme" aria-label="Colour theme">
+          <span class="seg__thumb" aria-hidden="true"></span>
+          <button class="seg__btn" type="button" data-theme-set="light" data-i18n-label="a11y.themeLight" aria-label="Light theme">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="4"/>
+              <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>
+            </svg>
+          </button>
+          <button class="seg__btn" type="button" data-theme-set="dark" data-i18n-label="a11y.themeDark" aria-label="Dark theme">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="seg seg--lang" role="group" data-i18n-label="a11y.lang" aria-label="Interface language">
+          <span class="seg__thumb" aria-hidden="true"></span>
+          <button class="seg__btn" type="button" data-lang-set="en" data-i18n-label="a11y.langEn" aria-label="English">EN</button>
+          <button class="seg__btn" type="button" data-lang-set="ru" data-i18n-label="a11y.langRu" aria-label="Russian">RU</button>
+        </div>
       </div>
     </div>
   </div>
@@ -470,32 +758,39 @@ h1 {
       <i class="logo-tile__glare" id="logo-glare" aria-hidden="true"></i>
     </div>
 
+    <p class="kicker" data-i18n="hero.kicker">Shaders for Roblox</p>
     <h1>Qwley Shade</h1>
 
-    <p class="lead">
-      A custom pointer with real inertia. The dot follows your movement, the ring trails
-      behind it, and the logo turns to face you — the segments only reach out when you come close.
+    <p class="lead" data-i18n="hero.lead">
+      A lighting and post-processing shader pack for Roblox — soft ambient light,
+      real shadows and richer colour, without giving up your frame rate.
     </p>
 
     <div class="hero__actions">
-      <a class="btn btn--solid btn--lg" href="https://raw.githubusercontent.com/daniil179828/QWLEY-SHADE-install-/f7156a76bbc8dcd405b4166b19e520e0e4d69d24/qwley-shade-launcher.exe" rel="noopener">Download</a>
+      <a class="btn btn--solid btn--lg" href="https://raw.githubusercontent.com/daniil179828/QWLEY-SHADE-install-/f7156a76bbc8dcd405b4166b19e520e0e4d69d24/qwley-shade-launcher.exe" rel="noopener">
+        <span data-i18n="nav.download">Download</span>
+      </a>
+
       <a class="btn btn--ghost btn--lg" href="https://t.me/qwleyshade" target="_blank" rel="noopener noreferrer">
         <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.9 4.3 18.7 19c-.2 1-.9 1.3-1.7.8l-4.7-3.5-2.3 2.2c-.3.3-.5.5-1 .5l.3-4.7 8.6-7.8c.4-.3-.1-.5-.6-.2L6.7 12.9 2.1 11.5c-1-.3-1-1 .2-1.4l18.2-7c.8-.3 1.6.2 1.4 1.2Z"/></svg>
-        Telegram
+        <span data-i18n="nav.telegram">Telegram</span>
       </a>
+
       <a class="btn btn--ghost btn--lg btn--fill" href="https://www.youtube.com/watch?v=jMY73smPAcc&amp;feature=youtu.be" target="_blank" rel="noopener noreferrer">
         <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.14v13.72L19 12 8 5.14Z"/></svg>
-        <span class="fill-text" data-text="Tutorial">Tutorial</span>
+        <span class="fill-text" data-i18n="nav.tutorial" data-text="Tutorial">Tutorial</span>
       </a>
     </div>
 
-    <p class="hint">Move the pointer — the Q turns toward you, the ring trails, the segments reach out.</p>
+    <p class="hint" data-i18n="hero.hint">
+      Move the pointer — the Q turns toward you, the ring trails, the segments reach out.
+    </p>
   </section>
 </main>
 
 <footer class="footer">
   <div class="wrap">
-    <div class="footer__inner">© 2026 Qwley Shade. All rights reserved.</div>
+    <div class="footer__inner" data-i18n="footer.copy">© 2026 Qwley Shade. All rights reserved.</div>
   </div>
 </footer>
 
@@ -512,6 +807,8 @@ h1 {
   var tile      = document.getElementById('logo-tile');
   var glare     = document.getElementById('logo-glare');
   var canvas    = document.getElementById('bg-canvas');
+  var metaDesc  = document.querySelector('meta[name="description"]');
+  var metaColor = document.querySelector('meta[name="theme-color"]');
 
   var finePointer   = window.matchMedia('(hover: hover) and (pointer: fine)');
   var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -529,12 +826,14 @@ h1 {
     speedNorm:   24,
     idleDelay:   2200,   // ms of stillness before the ring starts breathing
     glowLag:     0.18,   // eased pointer used by the spotlight AND the line origin
+    inkLag:      0.10,   // canvas colour cross-fade
     linkDist:    152,    // px — particle-to-particle connection range
     cursorLink:  250,    // px — particle-to-pointer connection range
     density:     17000   // px² per particle
   };
 
   var HOVER_SELECTOR = 'a, button, [data-cursor], input, textarea, select, label';
+  var STORE = { theme: 'qs-theme', lang: 'qs-lang' };
 
   /* ---------- state ---------- */
   var enabled = false;          // custom cursor layer active (fine pointer)
@@ -560,11 +859,158 @@ h1 {
   var tileScale = 1;
 
   /* ============================================================
+     Theme + language
+     ============================================================ */
+  var I18N = {
+    en: {
+      'meta.title': 'Qwley Shade — Shaders for Roblox',
+      'meta.desc':  'Qwley Shade is a lighting and post-processing shader pack for Roblox: soft ambient light, real shadows and richer colour without losing FPS.',
+      'nav.download': 'Download',
+      'nav.telegram': 'Telegram',
+      'nav.tutorial': 'Tutorial',
+      'hero.kicker':  'Shaders for Roblox',
+      'hero.lead':    'A lighting and post-processing shader pack for Roblox — soft ambient light, real shadows and richer colour, without giving up your frame rate.',
+      'hero.hint':    'Move the pointer — the Q turns toward you, the ring trails, the segments reach out.',
+      'footer.copy':  '© 2026 Qwley Shade. All rights reserved.',
+      'a11y.theme':      'Colour theme',
+      'a11y.themeLight': 'Light theme',
+      'a11y.themeDark':  'Dark theme',
+      'a11y.lang':       'Interface language',
+      'a11y.langEn':     'English',
+      'a11y.langRu':     'Russian'
+    },
+    ru: {
+      'meta.title': 'Qwley Shade — шейдеры для Roblox',
+      'meta.desc':  'Qwley Shade — набор шейдеров освещения и постобработки для Roblox: мягкий свет, настоящие тени и насыщенные цвета без потери FPS.',
+      'nav.download': 'Скачать',
+      'nav.telegram': 'Telegram',
+      'nav.tutorial': 'Туториал',
+      'hero.kicker':  'Шейдеры для Roblox',
+      'hero.lead':    'Набор шейдеров освещения и постобработки для Roblox — мягкий свет, настоящие тени и насыщенные цвета без потери кадров.',
+      'hero.hint':    'Подвигай курсором — лого поворачивается к тебе, кольцо тянется следом, отрезки соединяются с указателем.',
+      'footer.copy':  '© 2026 Qwley Shade. Все права защищены.',
+      'a11y.theme':      'Тема оформления',
+      'a11y.themeLight': 'Светлая тема',
+      'a11y.themeDark':  'Тёмная тема',
+      'a11y.lang':       'Язык интерфейса',
+      'a11y.langEn':     'Английский',
+      'a11y.langRu':     'Русский'
+    }
+  };
+
+  var THEME_BG = { dark: '#08090b', light: '#f4f5f7' };
+  var themeTimer = 0, langTimer = 0;
+
+  function store(key, value) {
+    try { localStorage.setItem(key, value); } catch (e) {}
+  }
+
+  function currentTheme() { return html.getAttribute('data-theme') === 'light' ? 'light' : 'dark'; }
+  function currentLang()  { return html.getAttribute('data-lang') === 'ru' ? 'ru' : 'en'; }
+
+  /* --- theme ------------------------------------------------- */
+  function setTheme(theme, animate) {
+    theme = theme === 'light' ? 'light' : 'dark';
+    if (theme === currentTheme()) { syncControls(); return; }
+
+    if (animate !== false && !reducedMotion.matches) {
+      html.classList.add('theme-anim');
+      void html.offsetHeight;                 // flush styles so the transition is armed
+    }
+
+    html.setAttribute('data-theme', theme);
+    if (metaColor) metaColor.setAttribute('content', THEME_BG[theme]);
+    store(STORE.theme, theme);
+    readInk();                                 // canvas cross-fades to the new ink
+    syncControls();
+
+    if (animate !== false && !reducedMotion.matches) {
+      clearTimeout(themeTimer);
+      themeTimer = setTimeout(function () { html.classList.remove('theme-anim'); }, 540);
+    } else {
+      html.classList.remove('theme-anim');
+    }
+  }
+
+  /* --- language ---------------------------------------------- */
+  function writeStrings(lang) {
+    var dict = I18N[lang] || I18N.en;
+
+    var nodes = document.querySelectorAll('[data-i18n]');
+    for (var i = 0; i < nodes.length; i++) {
+      var el = nodes[i];
+      var val = dict[el.getAttribute('data-i18n')];
+      if (val == null) continue;
+      el.textContent = val;
+      if (el.hasAttribute('data-text')) el.setAttribute('data-text', val);
+    }
+
+    var labelled = document.querySelectorAll('[data-i18n-label]');
+    for (var j = 0; j < labelled.length; j++) {
+      var lb = labelled[j];
+      var lv = dict[lb.getAttribute('data-i18n-label')];
+      if (lv != null) lb.setAttribute('aria-label', lv);
+    }
+
+    if (dict['meta.title']) document.title = dict['meta.title'];
+    if (metaDesc && dict['meta.desc']) metaDesc.setAttribute('content', dict['meta.desc']);
+  }
+
+  function setLang(lang, animate) {
+    lang = lang === 'ru' ? 'ru' : 'en';
+    if (lang === currentLang()) { syncControls(); return; }
+
+    html.setAttribute('data-lang', lang);
+    html.setAttribute('lang', lang);
+    store(STORE.lang, lang);
+    syncControls();
+
+    if (animate === false || reducedMotion.matches) {
+      writeStrings(lang);
+      return;
+    }
+
+    // fade the labels out, swap them, fade back in — no abrupt jump
+    html.classList.add('i18n-fade');
+    clearTimeout(langTimer);
+    langTimer = setTimeout(function () {
+      writeStrings(lang);
+      void html.offsetHeight;
+      html.classList.remove('i18n-fade');
+    }, 180);
+  }
+
+  /* --- controls ---------------------------------------------- */
+  function syncControls() {
+    var theme = currentTheme(), lang = currentLang();
+    var themeBtns = document.querySelectorAll('[data-theme-set]');
+    for (var i = 0; i < themeBtns.length; i++) {
+      themeBtns[i].setAttribute('aria-pressed', String(themeBtns[i].getAttribute('data-theme-set') === theme));
+    }
+    var langBtns = document.querySelectorAll('[data-lang-set]');
+    for (var j = 0; j < langBtns.length; j++) {
+      langBtns[j].setAttribute('aria-pressed', String(langBtns[j].getAttribute('data-lang-set') === lang));
+    }
+  }
+
+  /* ============================================================
      Background: drifting particles linked by segments
      ============================================================ */
   var ctx = canvas.getContext('2d');
   var W = 0, H = 0, DPR = 1;
   var particles = [];
+  var ink = { r: 255, g: 255, b: 255 };          // eased canvas colour
+  var inkTarget = { r: 255, g: 255, b: 255 };
+
+  function readInk() {
+    var v = window.getComputedStyle(html).getPropertyValue('--ink-rgb');
+    var p = v.split(',');
+    if (p.length === 3) {
+      inkTarget.r = parseFloat(p[0]) || 0;
+      inkTarget.g = parseFloat(p[1]) || 0;
+      inkTarget.b = parseFloat(p[2]) || 0;
+    }
+  }
 
   function buildParticles() {
     var count = Math.round(Math.min(120, Math.max(34, (W * H) / CFG.density)));
@@ -594,11 +1040,14 @@ h1 {
 
   function drawBackground(dt) {
     ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = 'rgb(' + Math.round(ink.r) + ',' + Math.round(ink.g) + ',' + Math.round(ink.b) + ')';
+    ctx.strokeStyle = ctx.fillStyle;
+    ctx.lineWidth = 1;
 
     var calm   = reducedMotion.matches;
     var motion = calm ? 0 : dt / 16.6667;   // frame-rate independent drift
     var n = particles.length;
-    var i, j, p, q, dx, dy, d2, d, alpha;
+    var i, j, p, q, dx, dy, d2, d;
     var linkD2 = CFG.linkDist * CFG.linkDist;
     var curD2  = CFG.cursorLink * CFG.cursorLink;
 
@@ -614,7 +1063,6 @@ h1 {
     }
 
     /* --- segments between nearby particles --- */
-    ctx.lineWidth = 1;
     for (i = 0; i < n; i++) {
       p = particles[i];
       for (j = i + 1; j < n; j++) {
@@ -622,8 +1070,7 @@ h1 {
         dx = p.x - q.x; dy = p.y - q.y;
         d2 = dx * dx + dy * dy;
         if (d2 < linkD2) {
-          alpha = (1 - Math.sqrt(d2) / CFG.linkDist) * 0.13;
-          ctx.strokeStyle = 'rgba(255,255,255,' + alpha.toFixed(3) + ')';
+          ctx.globalAlpha = (1 - Math.sqrt(d2) / CFG.linkDist) * 0.13;
           ctx.beginPath();
           ctx.moveTo(p.x, p.y);
           ctx.lineTo(q.x, q.y);
@@ -640,8 +1087,7 @@ h1 {
         d2 = dx * dx + dy * dy;
         if (d2 < curD2) {
           d = Math.sqrt(d2);
-          alpha = (1 - d / CFG.cursorLink) * 0.4;
-          ctx.strokeStyle = 'rgba(255,255,255,' + alpha.toFixed(3) + ')';
+          ctx.globalAlpha = (1 - d / CFG.cursorLink) * 0.4;
           ctx.beginPath();
           ctx.moveTo(glowPos.x, glowPos.y);
           ctx.lineTo(p.x, p.y);
@@ -653,11 +1099,13 @@ h1 {
     /* --- dots on top --- */
     for (i = 0; i < n; i++) {
       p = particles[i];
-      ctx.fillStyle = 'rgba(255,255,255,' + p.a.toFixed(3) + ')';
+      ctx.globalAlpha = p.a;
       ctx.beginPath();
       ctx.arc(p.x, p.y, p.r, 0, 6.2832);
       ctx.fill();
     }
+
+    ctx.globalAlpha = 1;
   }
 
   /* ============================================================
@@ -708,6 +1156,12 @@ h1 {
     if (dt > 64) dt = 64;              // tab was hidden — never teleport
 
     var calm = reducedMotion.matches;  // reduced motion => no inertia at all
+
+    /* ---------- canvas colour cross-fade ---------- */
+    var ki = calm ? 1 : ease(CFG.inkLag, dt);
+    ink.r += (inkTarget.r - ink.r) * ki;
+    ink.g += (inkTarget.g - ink.g) * ki;
+    ink.b += (inkTarget.b - ink.b) * ki;
 
     /* ---------- the ring: slow, weighted ---------- */
     var kr = calm ? 1 : ease(CFG.ringLag, dt);
@@ -836,6 +1290,31 @@ h1 {
   });
   document.addEventListener('focusout', function () { setHover(false); });
 
+  /* --- controls wiring --- */
+  document.addEventListener('click', function (e) {
+    var el = e.target && e.target.closest ? e.target.closest('[data-theme-set], [data-lang-set]') : null;
+    if (!el) return;
+    if (el.hasAttribute('data-theme-set')) setTheme(el.getAttribute('data-theme-set'), true);
+    else setLang(el.getAttribute('data-lang-set'), true);
+  });
+
+  // Follow the OS setting while the user has not picked a theme manually
+  function onSystemTheme(e) {
+    var stored = null;
+    try { stored = localStorage.getItem(STORE.theme); } catch (err) {}
+    if (stored === 'light' || stored === 'dark') return;
+    setTheme(e.matches ? 'light' : 'dark', true);
+  }
+  if (typeof finePointer.addEventListener === 'function') {
+    finePointer.addEventListener('change', sync);
+  } else if (typeof finePointer.addListener === 'function') {
+    finePointer.addListener(sync);
+  }
+
+  var scheme = window.matchMedia('(prefers-color-scheme: light)');
+  if (typeof scheme.addEventListener === 'function') scheme.addEventListener('change', onSystemTheme);
+  else if (typeof scheme.addListener === 'function') scheme.addListener(onSystemTheme);
+
   window.addEventListener('resize', resizeCanvas);
   window.addEventListener('scroll', measureHome, { passive: true });
 
@@ -871,17 +1350,16 @@ h1 {
     }
   }
 
-  if (typeof finePointer.addEventListener === 'function') {
-    finePointer.addEventListener('change', sync);
-  } else if (typeof finePointer.addListener === 'function') {
-    finePointer.addListener(sync);
-  }
-
   /* ---------- boot ---------- */
   resizeCanvas();
   measureHome();
   glowPos.x = home.x;
   glowPos.y = home.y;
+  readInk();
+  ink.r = inkTarget.r; ink.g = inkTarget.g; ink.b = inkTarget.b;
+  if (metaColor) metaColor.setAttribute('content', THEME_BG[currentTheme()]);
+  writeStrings(currentLang());     // no animation on first paint
+  syncControls();
   sync();
   rafId = window.requestAnimationFrame(frame);   // always on: the background animates everywhere
 })();
